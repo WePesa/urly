@@ -35,22 +35,34 @@ from urly import Urly
 from view import MainView
 
 class MainHandler(webapp.RequestHandler):
+    
     """All non-static requests go through this handler.
     The code and format parameters are pre-populated by
     our routing regex... see main() below.
     """
     def get(self, code, format):
+        
+        server = "http://" + self.request.environ["HTTP_HOST"]+"/"
+        
+        logging.info("*** Server is %s" % server)
+        
         if (code is None):
+            logging.info("*** Code is None")
             MainView.render(self, 200, None, format)
             return
+
+        logging.info("*** Code is %s" % code)    
+
         
         href = self.request.get('href').strip().encode('utf-8')
         title = self.request.get('title').strip().encode('utf-8')
         if (code == 'new') and (href is not None):
+            logging.info("href is %s" % href)
             try:
                 u = Urly.find_or_create_by_href(href)
                 if u is not None:
-                    MainView.render(self, 200, u, format, href, title)
+                    logging.debug("Rendering with server %s" % server)
+                    MainView.render(self, 200, u, format, href, title,server)
                 else:
                     logging.error("Error creating urly by href: %s", str(href))
                     MainView.render(self, 400, None, format, href)
@@ -60,11 +72,12 @@ class MainHandler(webapp.RequestHandler):
         else:
             u = Urly.find_by_code(str(code))
             if u is not None:
-                MainView.render(self, 200, u, format)
+                MainView.render(self, 200, u, format,href,title,server)
             else:
                 MainView.render(self, 404, None, format)
     
     def head(self, code, format):
+        
         if (code is None):
             self.error(400)
         else:
