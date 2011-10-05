@@ -52,7 +52,6 @@ class MainHandler(webapp.RequestHandler):
             return
 
         logging.info("*** Code is %s" % code)    
-
         
         href = self.request.get('href').strip().encode('utf-8')
         title = self.request.get('title').strip().encode('utf-8')
